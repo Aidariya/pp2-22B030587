@@ -1,120 +1,110 @@
 import pygame
 
 pygame.init()
-WIDTH, HEIGHT = 800, 800
+
+#Display settings
+WIDTH, HEIGHT = 500, 600
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
-BLACK = pygame.Color(0, 0, 0)
-WHITE = pygame.Color(255, 255, 255)
+SCREEN.fill((255,255,255))
 
+mouse = True
 
-class GameObject:
-    def draw(self):
-        raise NotImplementedError
-
-    def handle(self, mouse_pos):
-        raise NotImplementedError
-
-
-class Button:
+# Class for drawing
+class drawing(object):
+ 
     def __init__(self):
-        self.rect = pygame.draw.rect(
-            SCREEN,
-            (0, 255, 0),
-            (WIDTH // 2 - 20, 20, 40, 40)
-        )
-
-    def draw(self):
-        self.rect = pygame.draw.rect(
-            SCREEN,
-            (0, 255, 0),
-            (WIDTH // 2 - 20, 20, 40, 40)
-        )
-
-
-class Pen(GameObject):
-    def __init__(self, *args, **kwargs):
-        self.points = []  # [(x1, y1), (x2, y2)]
-
-    def draw(self):
-        for idx, value in enumerate(self.points[:-1]):
-            pygame.draw.line(
-                SCREEN,
-                WHITE,
-                start_pos=value,  # self.points[idx]
-                end_pos=self.points[idx + 1],
-            )
-
-    def handle(self, mouse_pos):
-        self.points.append(mouse_pos)
-
-
-class Rectangle(GameObject):
-    def __init__(self, start_pos):
-        self.start_pos = start_pos  # (x1, y1)
-        self.end_pos = start_pos  # (x2, y2)
-
-    def draw(self):
-        start_pos_x = min(self.start_pos[0], self.end_pos[0])
-        start_pos_y = min(self.start_pos[1], self.end_pos[1])
-
-        end_pos_x = max(self.start_pos[0], self.end_pos[0])
-        end_pos_y = max(self.start_pos[1], self.end_pos[1])
-
-        pygame.draw.rect(
-            SCREEN,
-            WHITE,
-            (
-                start_pos_x,
-                start_pos_y,
-                end_pos_x - start_pos_x,
-                end_pos_y - start_pos_y,
-            ),
-            width=5,
-        )
-
-    def handle(self, mouse_pos):
-        self.end_pos = mouse_pos
+        self.color = (0, 0, 0)
+        self.width = 10
+        self.height = 10
+        self.rad = 6
+         
+    # Drawing Function
+    def draw(self, win, pos):
+        if mouse:
+            pygame.draw.circle(win, self.color, (pos[0], pos[1]), self.rad)
+        elif not mouse:
+            pygame.draw.rect(win,self.color,(pos[0],pos[1],50,50))
+            
+        if self.color == (255, 255, 255):
+            pygame.draw.circle(win, self.color, (pos[0], pos[1]), 20)
+        
+        pygame.draw.rect(win, (0, 0, 0), (0, 0, WIDTH-100, HEIGHT),5)
+ 
+    # detecting clicks
+    def click(self, win, list):
+        global mouse
+        pos = pygame.mouse.get_pos()
+ 
+        if pygame.mouse.get_pressed() == (1, 0, 0) and pos[0] < 400:
+            if pos[1] > 25:
+                self.draw(win, pos)
+        elif pygame.mouse.get_pressed() == (1, 0, 0):
+            for button in list:
+                if pos[0] > button.x and pos[0] < button.x + button.width:
+                    if pos[1] > button.y and pos[1] < button.y + button.height:
+                        self.color = button.color2
+                if pos[0] > 407 and pos[0] < 407 + 40:
+                    if pos[1] > 214 and pos[1] < 214 + 40:
+                        mouse = False
+                if pos[0] > 453 and pos[0] < 453 + 40:
+                    if pos[1] > 214 and pos[1] < 214 + 40:
+                        mouse = True
+                        
 
 
-def main():
-    running = True
-    clock = pygame.time.Clock()
-    active_obj = None
-    button = Button()
+class button(object):
+ 
+    def __init__(self, x, y, width, height, color, color2, outline=0, action=0, text=''):
+        self.x = x
+        self.y = y
+        self.height = height
+        self.width = width
+        self.color = color
+        self.outline = outline
+        self.color2 = color2
+        self.action = action
+        self.text = text
 
-    objects = [
-        button,
-    ]
-    # current_shape = 'pen'
-    current_shape = Pen
+    def draw(self, win):
+ 
+        pygame.draw.rect(win, self.color, (self.x, self.y,self.width, self.height), self.outline)
+        pygame.draw.rect(win, (255, 255, 255), (410, 446, 80, 35))
 
-    while running:
-        SCREEN.fill(BLACK)
+def draw(win):
+    drawing1.click(win, Buttons_color)
+ 
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
+    for button in Buttons_color:
+        button.draw(win)
+ 
+    pygame.display.update()
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if button.rect.collidepoint(event.pos):
-                    current_shape = Rectangle
-                else:
-                    active_obj = current_shape(start_pos=event.pos)
+drawing1 = drawing()
 
-            if event.type == pygame.MOUSEMOTION and active_obj is not None:
-                active_obj.handle(pygame.mouse.get_pos())
-                active_obj.draw()
+#Colored buttons
+redButton = button(453, 30, 40, 40, (255, 0, 0), (255, 0, 0))
+blueButton = button(407, 30, 40, 40, (0, 0, 255), (0, 0, 255))
+greenButton = button(407, 76, 40, 40, (0, 255, 0), (0, 255, 0))
+orangeButton = button(453, 76, 40, 40, (255, 192, 0), (255, 192, 0))
+yellowButton = button(407, 122, 40, 40, (255, 255, 0), (255, 255, 0))
+purpleButton = button(453, 122, 40, 40, (112, 48, 160), (112, 48, 160))
+blackButton = button(407, 168, 40, 40, (0, 0, 0), (0, 0, 0))
+whiteButton = button(453, 168, 40, 40, (0, 0, 0), (255, 255, 255), 1)
+rectangleButton = button(407, 214, 40, 40, (0,0,0), (0,0,0))
 
-            if event.type == pygame.MOUSEBUTTONUP and active_obj is not None:
-                objects.append(active_obj)
-                active_obj = None
+Buttons_color = [blueButton, redButton, greenButton, orangeButton,
+                 yellowButton, purpleButton, blackButton, whiteButton,rectangleButton]
 
-        for obj in objects:
-            obj.draw()
+running = True
+while running:
+    pos = pygame.mouse.get_pos()
+    pressed = pygame.mouse.get_pressed()
 
-        clock.tick(30)
-        pygame.display.flip()
+    pygame.draw.circle(SCREEN, (0,0,0), (476, 237), 20)
 
+    draw(SCREEN)
 
-if __name__ == '__main__':
-    main()
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+            pygame.quit()

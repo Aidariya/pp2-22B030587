@@ -124,7 +124,7 @@ print(total_average)
 
 #5
 def average_to_category(movies,cat_name): 
-    cat_movies=return_movie_category(movies,cat_name)
+    cat_movies= category(movies,cat_name)
     avg_score=average_to_category(cat_movies)
     return avg_score
 
